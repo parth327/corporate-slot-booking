@@ -113,7 +113,7 @@ export default function AdminOverview() {
                   {statuses.map(([status, count]) => (
                     <span
                       key={status}
-                      className={cn(BAR_TONE[status] || 'bg-ink-300')}
+                      className={cn('transition-[width] duration-700 ease-out', BAR_TONE[status] || 'bg-ink-300')}
                       style={{ width: `${(count / statusTotal) * 100}%` }}
                       title={`${statusMeta(status).label}: ${count}`}
                     />
@@ -161,7 +161,7 @@ export default function AdminOverview() {
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-ink-100">
                       <div
-                        className="h-full rounded-full bg-brand-500 transition-all"
+                        className="h-full rounded-full bg-brand-500 transition-[width] duration-700 ease-out"
                         style={{ width: `${Math.round(((room.minutes_booked || 0) / busiest) * 100)}%` }}
                       />
                     </div>

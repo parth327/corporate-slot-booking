@@ -28,6 +28,13 @@ const AdminRooms = lazy(() => import('./pages/admin/AdminRooms.jsx'));
 const AdminGatepasses = lazy(() => import('./pages/admin/AdminGatepasses.jsx'));
 const AdminLogs = lazy(() => import('./pages/admin/AdminLogs.jsx'));
 
+// Standalone GSAP + Lenis scroll-choreography foundation — no relation to
+// the GatePass app's own data/auth. Lazy and unwrapped by PublicShell on
+// purpose: it owns its own full-bleed dark layout and its own Lenis
+// instance, and mixing a second smooth-scroll library into the app's normal
+// chrome would fight the rest of the site's scrolling.
+const CinematicShowcase = lazy(() => import('./showcase/CinematicShowcase.jsx'));
+
 function PageFallback() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
@@ -84,6 +91,7 @@ export default function App() {
               </PublicShell>
             }
           />
+          <Route path="/showcase" element={<CinematicShowcase />} />
           <Route
             path="/login"
             element={

@@ -151,7 +151,6 @@ export default function DataTable({
           return clickable ? (
             <Card
               key={rowKey(row)}
-              as="div"
               role="button"
               tabIndex={0}
               onClick={() => onRowClick(row)}

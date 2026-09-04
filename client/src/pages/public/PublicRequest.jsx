@@ -13,6 +13,7 @@ import {
   growLine,
 } from '../../lib/motion.js';
 import { todayISO, minutesBetween } from '../../lib/format.js';
+import useLenis from '../../lib/useLenis.js';
 import Card, { CardBody } from '../../components/ui/Card.jsx';
 import Input from '../../components/ui/Input.jsx';
 import Textarea from '../../components/ui/Textarea.jsx';
@@ -23,6 +24,9 @@ import Button from '../../components/ui/Button.jsx';
 import Spinner from '../../components/ui/Spinner.jsx';
 import Eyebrow from '../../components/ui/Eyebrow.jsx';
 import HeroGallery from '../../components/public/HeroGallery.jsx';
+import CinematicReveal from '../../components/public/CinematicReveal.jsx';
+import CinematicParallax from '../../components/public/CinematicParallax.jsx';
+import IntroLoader from '../../components/public/IntroLoader.jsx';
 
 const EMPTY = {
   visitor_name: '',
@@ -87,6 +91,13 @@ export default function PublicRequest() {
   const navigate = useNavigate();
   const toast = useToast();
   const formRef = useRef(null);
+
+  // Smooth, inertia-based scroll for this page's cinematic sections below —
+  // see lib/useLenis.js for the full mechanics of wiring it into GSAP's
+  // frame loop so ScrollTrigger's pin/scrub animations stay in sync with it.
+  // Purely a feel upgrade for wheel/touch scrolling; it doesn't touch focus,
+  // clicks or typing, so the form further down is unaffected.
+  useLenis();
 
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
@@ -183,15 +194,24 @@ export default function PublicRequest() {
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <IntroLoader />
       <HeroGallery
         fullBleed
         showScrollCue
         headline="Request a visit"
         subtitle="Tell us who you are meeting and when. Your host confirms the slot and books the room — your gatepass follows by email."
-        className="mb-10"
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <CinematicReveal
+        image="/images/4.jpeg"
+        alt="A GatePass visitor badge with photo, company and a scannable QR code"
+        eyebrow="Your gate pass"
+        heading="Delivered to your inbox before you've even left the lobby."
+      />
+
+      <CinematicParallax />
+
+      <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <Card accent>
           <CardBody>
             <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-700 motion-safe:animate-badge-in">
