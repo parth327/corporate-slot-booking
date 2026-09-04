@@ -228,6 +228,14 @@ export async function qrImage(req, res) {
     // issued (a re-approval mints a new token, so the URL changes with it) —
     // safe to cache hard, including in the recipient's mail client.
     'Cache-Control': 'public, max-age=31536000, immutable',
+    // helmet's default Cross-Origin-Resource-Policy is 'same-origin', which
+    // blocks a cross-origin <img src> from loading this at all — invisible in
+    // local dev (Vite's proxy makes the request same-origin to the browser),
+    // but breaks every deployment where the client and API are on different
+    // origins (e.g. Vercel + Render). This route exists specifically to be
+    // embedded from anywhere an unauthenticated <img> can point at it — mail
+    // clients, and now our own separately-hosted frontend — so it opts out.
+    'Cross-Origin-Resource-Policy': 'cross-origin',
   });
   res.send(png);
 }
