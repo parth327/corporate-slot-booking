@@ -9,7 +9,12 @@ import axios from 'axios';
 
 export const AUTH_STORAGE_KEY = 'gatepass.auth';
 
-const api = axios.create({ baseURL: '/api', timeout: 20000 });
+// Local dev leaves this as the relative '/api' default — Vite's own dev-server
+// proxy (vite.config.js) forwards it to the Express server. That proxy has no
+// equivalent once the client is a static production build (e.g. on Vercel),
+// so a deployment that serves only the client needs VITE_API_URL pointed at
+// wherever the API actually runs.
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api', timeout: 20000 });
 
 // --- token storage --------------------------------------------------------------
 
