@@ -19,6 +19,7 @@ import StatusBadge from '../../components/ui/StatusBadge.jsx';
 import Pagination from '../../components/ui/Pagination.jsx';
 import EmptyState from '../../components/ui/EmptyState.jsx';
 import DataTable from '../../components/admin/DataTable.jsx';
+import GatepassCard from '../../components/shared/GatepassCard.jsx';
 
 function Detail({ label, children }) {
   return (
@@ -222,9 +223,13 @@ export default function AdminGatepasses() {
       >
         {selected && (
           <div className="space-y-6">
-            <div>
-              <StatusBadge status={selected.display_status} size="md" />
-            </div>
+            {selected.qr_short_code && ['APPROVED', 'CHECKED_IN', 'COMPLETED'].includes(selected.display_status) ? (
+              <GatepassCard gatepass={selected} />
+            ) : (
+              <div>
+                <StatusBadge status={selected.display_status} size="md" />
+              </div>
+            )}
 
             <section>
               <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-ink-400">Visitor</h3>

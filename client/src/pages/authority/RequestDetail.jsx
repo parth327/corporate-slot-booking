@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   CalendarDays, Clock, MapPin, MessageSquare, Send, XCircle, CalendarClock,
-  Replace, DoorClosed, Mail, Copy, Check, AlertCircle, FileText, Hourglass,
+  Replace, DoorClosed, Mail, AlertCircle, FileText, Hourglass,
   CheckCircle2, LogIn, LogOut, Building2,
 } from 'lucide-react';
 import cn from '../../lib/cn.js';
@@ -27,6 +27,7 @@ import Skeleton, { SkeletonText } from '../../components/ui/Skeleton.jsx';
 import EmptyState from '../../components/ui/EmptyState.jsx';
 import ApproveRoomModal from '../../components/authority/ApproveRoomModal.jsx';
 import VisitorContactBar from '../../components/authority/VisitorContactBar.jsx';
+import GatepassCard from '../../components/shared/GatepassCard.jsx';
 
 function DetailRow({ icon: Icon, label, children }) {
   return (
@@ -93,7 +94,6 @@ export default function RequestDetail() {
   const [g, setG] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const [roomModal, setRoomModal] = useState(null); // 'approve' | 'switch' | null
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -138,17 +138,6 @@ export default function RequestDetail() {
       return false;
     } finally {
       setBusy(false);
-    }
-  };
-
-  const copyCode = async () => {
-    try {
-      await navigator.clipboard.writeText(g.qr_short_code);
-      setCopied(true);
-      toast.success('Gatepass code copied.');
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error('Could not copy the code.');
     }
   };
 
@@ -284,28 +273,13 @@ export default function RequestDetail() {
           </Card>
 
           {(isApproved || isCheckedIn) && g.qr_short_code && (
-            <Card>
-              <CardBody>
-                <p className="text-xs font-medium uppercase tracking-wide text-ink-400">Gatepass code</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <code className="flex-1 rounded-xl border border-dashed border-brand-200 bg-brand-50/60 px-3 py-2.5 text-center font-mono text-lg font-semibold tracking-[0.2em] text-brand-800">
-                    {g.qr_short_code}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={copyCode}
-                    aria-label="Copy gatepass code"
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-ink-200 text-ink-400 transition-colors hover:border-brand-200 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-                  >
-                    {copied ? <Check size={16} className="text-success" /> : <Copy size={16} />}
-                  </button>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-ink-400">
-                  The visitor has the scannable QR code by email. This code is the fallback if the
-                  camera will not read it.
-                </p>
-              </CardBody>
-            </Card>
+            <div>
+              <GatepassCard gatepass={g} />
+              <p className="mt-2 text-center text-xs leading-relaxed text-ink-400">
+                The visitor received this same pass by email — this is the fallback if their camera
+                will not read it.
+              </p>
+            </div>
           )}
 
           <Card>

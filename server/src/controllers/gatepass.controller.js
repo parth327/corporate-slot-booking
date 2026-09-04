@@ -119,7 +119,10 @@ export async function listGatepassesQuery({ user, query: q = {}, unscoped = fals
     countParams
   );
 
-  return { items: serializeMany(rows), total: countRows[0].total, page, pageSize };
+  // Same trust boundary as getOne(): an AUTHORITY only ever sees their own
+  // requests here (scoped above), and ADMIN already sees everything else
+  // about every request — the QR token adds no new exposure for either.
+  return { items: serializeMany(rows, { includeQr: true }), total: countRows[0].total, page, pageSize };
 }
 
 // --- read -------------------------------------------------------------------

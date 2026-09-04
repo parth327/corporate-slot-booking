@@ -14,7 +14,14 @@ export const AUTH_STORAGE_KEY = 'gatepass.auth';
 // equivalent once the client is a static production build (e.g. on Vercel),
 // so a deployment that serves only the client needs VITE_API_URL pointed at
 // wherever the API actually runs.
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api', timeout: 20000 });
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const api = axios.create({ baseURL: API_BASE_URL, timeout: 20000 });
+
+/** The public, token-authenticated QR image for a gate pass — a raw <img src>, not an axios call. */
+export function qrImageUrl(gatepassId, qrCodeHash) {
+  if (!gatepassId || !qrCodeHash) return null;
+  return `${API_BASE_URL}/gatepasses/${gatepassId}/qr.png?token=${encodeURIComponent(qrCodeHash)}`;
+}
 
 // --- token storage --------------------------------------------------------------
 

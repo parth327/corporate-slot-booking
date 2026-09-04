@@ -167,18 +167,62 @@ function codeHtml(code, caption) {
   );
 }
 
-function qrHtml(qrImageUrl) {
+/**
+ * The gate pass as one self-contained "badge" block — QR, code and the facts
+ * a visitor needs at the gate, together in one bordered card — rather than a
+ * bare QR image with the rest of the details scattered in a plain table below
+ * it. Mirrors the client dashboard's GatepassCard visually as closely as
+ * table-based, Outlook-safe email markup allows (a solid brand fill instead
+ * of the client's CSS gradient — gradients render inconsistently in Outlook's
+ * Word rendering engine).
+ */
+function gatepassCardHtml({ visitorName, visitorSub, statusLabel, qrImageUrl, code, facts = [] }) {
   const src = safeImageSrc(qrImageUrl);
-  if (!src) return '';
+  const visibleFacts = facts.filter((f) => f && f.value);
+
+  const factsHtml = visibleFacts.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin-top:18px;">` +
+      visibleFacts
+        .map(
+          (f) =>
+            `<tr><td style="padding:5px 0;font:400 13px/1.6 ${FONT};color:${INK_500};" width="34%">${escapeHtml(
+              f.label
+            )}</td>` +
+            `<td style="padding:5px 0;font:600 13px/1.6 ${FONT};color:${INK_900};">${escapeHtml(f.value)}</td></tr>`
+        )
+        .join('') +
+      `</table>`
+    : '';
+
+  const qrBlock = src
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:18px auto 0;"><tr><td align="center" style="padding:14px;background:${CARD_BG};border:1px dashed ${BRAND};border-radius:16px;">` +
+      `<img src="${src}" width="180" height="180" alt="GatePass QR code" style="display:block;width:180px;height:180px;border:0;outline:none;text-decoration:none;background:#ffffff;" />` +
+      (code
+        ? `<div style="margin-top:10px;font:700 18px/1.2 ${MONO};letter-spacing:4px;color:${INK_900};">${escapeHtml(
+            code
+          )}</div>`
+        : '') +
+      `<div style="margin-top:6px;font:600 11px/1.6 ${FONT};color:${INK_500};">Show this at the security desk</div>` +
+      `</td></tr></table>`
+    : '';
+
   return (
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" ` +
-    `style="width:100%;margin:20px 0 0;"><tr><td align="center" ` +
-    `style="padding:16px;background:${CARD_BG};border:1px solid ${LINE};border-radius:16px;">` +
-    `<img src="${src}" width="220" height="220" alt="GatePass QR code" ` +
-    `style="display:block;width:220px;height:220px;border:0;outline:none;text-decoration:none;` +
-    `background:#ffffff;border-radius:8px;" />` +
-    `<div style="font:600 12px/1.6 ${FONT};color:${INK_500};padding-top:10px;">` +
-    `Show this QR at the security desk</div>` +
+    `style="width:100%;margin:20px 0 0;border:1px solid ${LINE};border-radius:18px;overflow:hidden;">` +
+    `<tr><td bgcolor="${BRAND}" style="background:${BRAND};padding:16px 22px;">` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
+    `<td align="left" style="font:700 13px/1.4 ${FONT};color:#ffffff;letter-spacing:.3px;">VISITOR PASS</td>` +
+    `<td align="right" style="font:600 11px/1.4 ${FONT};color:${BRAND_SOFT};text-transform:uppercase;letter-spacing:.5px;">${escapeHtml(
+      statusLabel || 'Approved'
+    )}</td>` +
+    `</tr></table></td></tr>` +
+    `<tr><td bgcolor="${CARD_BG}" style="background:${CARD_BG};padding:22px;">` +
+    `<div style="font:700 17px/1.3 ${FONT};color:${INK_900};">${escapeHtml(visitorName || '')}</div>` +
+    (visitorSub
+      ? `<div style="margin-top:2px;font:400 13px/1.5 ${FONT};color:${INK_500};">${escapeHtml(visitorSub)}</div>`
+      : '') +
+    qrBlock +
+    factsHtml +
     `</td></tr></table>`
   );
 }
@@ -404,36 +448,40 @@ export function newRequestToAuthority({ gatepass, authority, actionUrl } = {}) {
   });
 }
 
-/** 2. Approved — the visitor gets the QR pass. */
+/** 2. Approved — the visitor gets the QR pass, as one unified badge-style card. */
 export function approvedToVisitor({ gatepass, qrImageUrl, room, authority } = {}) {
   const g = gatepass || {};
   const host = hostOf(authority, g);
   const r = pickRoom(room, g);
   const code = g.qr_short_code || '';
 
-  const blocks = [
-    qrHtml(qrImageUrl),
-    codeHtml(code, code ? 'Cannot scan? Read this code out at the gate.' : ''),
-  ];
+  const card = gatepassCardHtml({
+    visitorName: g.visitor_name,
+    visitorSub: [g.visitor_designation, g.visitor_company].filter(Boolean).join(' · '),
+    statusLabel: 'Approved',
+    qrImageUrl,
+    code,
+    facts: [
+      { label: 'Date', value: dateHuman(g) },
+      { label: 'Time', value: rangeHuman(g) },
+      { label: 'Room', value: r.name || 'To be assigned at reception' },
+      { label: 'Host', value: host.name },
+    ],
+  });
 
   return compose({
     subject: `Your GatePass is approved — ${dateHuman(g)} at ${startHuman(g)}`,
     preheader: `Approved by ${host.name}. ${whenHuman(g)}${r.name ? ` · ${r.name}` : ''}.`,
     heading: 'Your visit is approved',
-    intro: `Hi ${g.visitor_name || 'there'}, ${host.name} approved your visit. Show the QR code below at the security desk when you arrive.`,
+    intro: `Hi ${g.visitor_name || 'there'}, ${host.name} approved your visit. Show the pass below at the security desk when you arrive.`,
     rows: [
-      { label: 'Host', value: host.name },
       { label: 'Host phone', value: host.mobile },
       { label: 'Department', value: host.department },
-      { label: 'Room', value: r.name || 'To be assigned at reception' },
       { label: 'Building', value: r.building },
       { label: 'Floor', value: r.floor ? String(r.floor) : '' },
-      { label: 'Date', value: dateHuman(g) },
-      { label: 'Time', value: rangeHuman(g) },
-      { label: 'Pass code', value: code },
       { label: 'Reference', value: reference(g) },
     ],
-    blocks,
+    blocks: [card],
     rowsFirst: false,
     textBlocks: [
       code ? `Gate pass code (read this out if the QR cannot be scanned): ${code}` : '',
