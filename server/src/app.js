@@ -43,6 +43,15 @@ export function createApp() {
   // See the no-store middleware just below for why this matters.
   app.set('etag', false);
 
+  // Dedicated uptime-pinger target — a free Render instance spins down after
+  // 15 minutes idle, so an external cron-job service hits this on a timer to
+  // keep it warm. Deliberately: no DB round trip (GET /api/health already
+  // covers "is the database actually reachable" for real health checks),
+  // registered before morgan so routine pings don't spam the request log,
+  // and plain text rather than JSON — the simplest possible response for
+  // whatever is polling it to parse.
+  app.get('/healthz', (req, res) => res.type('text/plain').send('ok'));
+
   // CSP off for now: this process also serves the built SPA (CLIENT_DIST below),
   // and a default CSP is easy to get wrong for a bundle it didn't build tooling
   // for here. The rest of helmet's headers (X-Frame-Options, X-Content-Type-
