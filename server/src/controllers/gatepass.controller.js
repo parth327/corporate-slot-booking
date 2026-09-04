@@ -19,6 +19,7 @@ import {
   signRescheduleToken,
   makeShortCode,
   renderQrBuffer,
+  scanUrl,
 } from '../utils/qr.js';
 import { formatDateHuman, formatRangeHuman, todayInOrgTz } from '../utils/time.js';
 
@@ -261,7 +262,7 @@ function apiBaseUrl(req) {
  */
 async function dispatchApprovalEmails(gatepass, room, baseUrl) {
   try {
-    const qrPng = await renderQrBuffer(gatepass.qr_code_hash);
+    const qrPng = await renderQrBuffer(scanUrl(gatepass.qr_code_hash));
     const qrImageUrl = `${baseUrl}/api/gatepasses/${gatepass.id}/qr.png?token=${encodeURIComponent(gatepass.qr_code_hash)}`;
     const invite = icsAttachment({ gatepass, room });
     const attachments = [

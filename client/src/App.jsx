@@ -10,6 +10,7 @@ import AppShell from './components/layout/AppShell.jsx';
 import PublicRequest from './pages/public/PublicRequest.jsx';
 import RequestSuccess from './pages/public/RequestSuccess.jsx';
 import Reschedule from './pages/public/Reschedule.jsx';
+import ScanRestricted from './pages/public/ScanRestricted.jsx';
 import Login from './pages/Login.jsx';
 import NotFound from './pages/NotFound.jsx';
 
@@ -72,6 +73,14 @@ export default function App() {
             element={
               <PublicShell>
                 <Reschedule />
+              </PublicShell>
+            }
+          />
+          <Route
+            path="/scan/:token"
+            element={
+              <PublicShell narrow>
+                <ScanRestricted />
               </PublicShell>
             }
           />

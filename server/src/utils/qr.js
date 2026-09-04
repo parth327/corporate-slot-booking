@@ -75,6 +75,23 @@ export function verifyGatepassToken(token) {
 }
 
 /**
+ * The URL actually encoded *inside* the QR pattern — deliberately a link to
+ * a public "this can only be scanned by security" page, not the bare JWT.
+ * A phone's default camera app treats a bare token as inert text (nothing
+ * happens when you scan it), which invites a curious visitor to try a random
+ * third-party QR reader instead. A URL opens directly and explains itself,
+ * without ever admitting or denying the token is valid — check-in only ever
+ * happens through the guard's own authenticated scan-and-verify flow, which
+ * extracts the token from this same URL rather than following it.
+ * @param {string} token the signed gate pass JWT (gatepass.qr_code_hash)
+ * @returns {string}
+ */
+export function scanUrl(token) {
+  const base = String((env && env.APP_URL) || 'http://localhost:5173').replace(/\/+$/, '');
+  return `${base}/scan/${encodeURIComponent(token)}`;
+}
+
+/**
  * Sign the token embedded in the public "propose a new time" link.
  * @param {number} gatepassId
  * @returns {string} JWT valid for 30 days

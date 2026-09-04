@@ -101,6 +101,24 @@ export default function GuardScan() {
 
   const scannedToday = (today?.stats?.on_premises ?? 0) + (today?.stats?.departed ?? 0);
 
+  /**
+   * The QR pattern encodes a scan-restriction page (/scan/<token>), not the
+   * bare token — anyone else's camera app opens that page and gets turned
+   * away, rather than doing nothing. The guard's own scanner needs the raw
+   * token back out for verification, and still accepts a bare token as-is
+   * for any pass issued before this page existed.
+   */
+  const extractGatepassToken = (text) => {
+    const raw = String(text || '').trim();
+    try {
+      const match = new URL(raw).pathname.match(/\/scan\/([^/?#]+)/);
+      if (match) return decodeURIComponent(match[1]);
+    } catch {
+      // Not a URL — treat it as an already-bare token.
+    }
+    return raw;
+  };
+
   const go = (result) => {
     navigate(`/guard/visitor/${result.gatepass.id}`, { state: { verification: result } });
   };
@@ -125,7 +143,7 @@ export default function GuardScan() {
   const onDecoded = useCallback(
     (text) => {
       setScanning(false);
-      verify({ token: text });
+      verify({ token: extractGatepassToken(text) });
     },
     [verify]
   );

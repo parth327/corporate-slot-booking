@@ -12,7 +12,7 @@ import { assertValidSlot } from '../services/booking.js';
 import { logActivity } from '../services/activity.js';
 import { safeSend } from '../services/mailer.js';
 import * as templates from '../services/templates.js';
-import { verifyRescheduleToken, renderQrBuffer } from '../utils/qr.js';
+import { verifyRescheduleToken, renderQrBuffer, scanUrl } from '../utils/qr.js';
 import { normalizeTime, toDateOnly } from '../utils/time.js';
 
 /** The hosts a visitor may choose from. */
@@ -221,7 +221,7 @@ export async function qrImage(req, res) {
     return;
   }
 
-  const png = await renderQrBuffer(token);
+  const png = await renderQrBuffer(scanUrl(token));
   res.set({
     'Content-Type': 'image/png',
     // The pairing of an id with its qr_code_hash never changes meaning once
