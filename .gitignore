@@ -13,3 +13,6 @@ Thumbs.db
 coverage/
 .cache/
 *.tsbuildinfo
+
+.vercel
+.env*
