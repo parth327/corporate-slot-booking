@@ -76,6 +76,7 @@ export const env = Object.freeze({
   APP_URL: trimTrailingSlash(str('APP_URL', 'http://localhost:5173')),
   TZ_OFFSET_MINUTES,
   ENABLE_CRON: bool('ENABLE_CRON', true),
+  CRON_SECRET: str('CRON_SECRET', ''),
   SEED_ADMIN_EMAIL: str('SEED_ADMIN_EMAIL', 'admin@gatepass.local').toLowerCase(),
   SEED_ADMIN_PASSWORD: str('SEED_ADMIN_PASSWORD', 'Admin@123'),
   SEED_DEMO_DATA: bool('SEED_DEMO_DATA', false),

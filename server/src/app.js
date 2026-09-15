@@ -21,6 +21,7 @@ import gatepassRoutes from './routes/gatepass.routes.js';
 import roomRoutes from './routes/room.routes.js';
 import securityRoutes from './routes/security.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import cronRoutes from './routes/cron.routes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLIENT_DIST = path.resolve(__dirname, '..', '..', 'client', 'dist');
@@ -90,6 +91,7 @@ export function createApp() {
   app.use('/api/rooms', roomRoutes);
   app.use('/api/security', securityRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/cron', cronRoutes);
 
   app.use('/api', notFoundHandler);
 
