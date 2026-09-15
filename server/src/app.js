@@ -58,7 +58,15 @@ export function createApp() {
   // for here. The rest of helmet's headers (X-Frame-Options, X-Content-Type-
   // Options, etc.) apply regardless and cost nothing to turn on.
   app.use(helmet({ contentSecurityPolicy: false }));
-  app.use(cors({ origin: corsOrigin(), credentials: false }));
+  const corsOptions = {
+  origin: corsOrigin(),
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400,
+   };
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));  // ← THIS is key!
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: false }));
   app.use(morgan(env.isProd ? 'combined' : 'dev'));
