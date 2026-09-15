@@ -1,5 +1,16 @@
 {
   "installCommand": "npm install",
   "buildCommand": "echo 'no build step — server/api/index.js deploys as-is'",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
+  "headers": [
+  {
+    "source": "/api/(.*)",
+    "headers": [
+      { "key": "Access-Control-Allow-Origin", "value": "*" },
+      { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD" },
+      { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" },
+      { "key": "Access-Control-Max-Age", "value": "86400" }
+    ]
+  }
+]
 }
