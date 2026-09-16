@@ -10,11 +10,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-/** Absolute path of the `server/` directory (src/config -> src -> server). */
-export const SERVER_ROOT = path.resolve(__dirname, '..', '..');
+let SERVER_ROOT;
+try {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  SERVER_ROOT = path.resolve(__dirname, '..', '..');
+} catch {
+  // In bundled serverless environments, import.meta.url is undefined.
+  // Fall back to resolving from cwd — environment variables will be set at deploy time anyway.
+  SERVER_ROOT = process.cwd();
+}
 /** Absolute path of the dotenv file we load. */
 export const ENV_FILE = path.join(SERVER_ROOT, '.env');
 /** Absolute path of the template we point users at when config is missing. */
