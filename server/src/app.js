@@ -23,8 +23,14 @@ import securityRoutes from './routes/security.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import cronRoutes from './routes/cron.routes.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CLIENT_DIST = path.resolve(__dirname, '..', '..', 'client', 'dist');
+let CLIENT_DIST = null;
+try {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  CLIENT_DIST = path.resolve(__dirname, '..', '..', 'client', 'dist');
+} catch {
+  // In bundled serverless environments (Netlify Functions), import.meta.url is undefined.
+  // The client is served separately via Netlify's static hosting, so API-only is fine.
+}
 
 /** '*' or a comma-separated allow-list. */
 function corsOrigin() {
