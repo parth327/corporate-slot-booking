@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "npm install --prefix client && npm install --prefix server && cd client && npm run build"
+  command = "npm ci --prefix client && npm ci --prefix server && npm run build --prefix client"
   publish = "client/dist"
 
 [build.environment]
